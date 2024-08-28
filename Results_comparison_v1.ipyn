@@ -1,0 +1,39 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+from google.colab import files
+
+# Upload the file
+uploaded = files.upload()
+
+# Assuming the file is uploaded with the same name
+file_path = list(uploaded.keys())[0]
+
+# Select the storm duration and frequency you want to interrogate
+RP = 30
+DUR = 30
+
+df = pd.read_excel(file_path, sheet_name='Results', header=0, nrows=17)
+
+# Select the names of the scenarios you want
+s0 = "M" + str(RP) + "-" + str(DUR) + " Flood/Lost Volume (m3)"
+s1 = "S2 Online upsize from 6002 M" + str(RP) + "-" + str(DUR) + " Flood/Lost Volume (m3)"
+
+columns_to_keep = ["Node ID", s0, s1]
+df = df[columns_to_keep]
+
+new_df = df.copy()
+
+df.fillna(0, inplace=True)
+df["Detriment"] = df.iloc[:, -1] - df.iloc[:, -2]
+
+df.fillna(0, inplace=True)
+
+sorted_df = df.sort_values(by='Detriment', ascending=False)
+
+df = sorted_df
+
+print(df)
+
+# Save the results to a new Excel file
+output_file_path = "Results_V_" + str(RP) + "_" + str(DUR) + ".xlsx"
+df.to_excel(output_file_path, sheet_name='Sheet')
